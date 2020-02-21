@@ -105,9 +105,9 @@ module.exports = {
       { // REVERSE ORDER
         test: /\.scss$/,
         use: [
-          { loader: 'style-loader' }, // #3- output CSS into style tag
-          { loader: 'css-loader' }, // #2 - CSS into JS and resolve dependencies
-          { loader: 'sass-loader' } // #1 - SCSS into CSS
+          { loader: 'style-loader' },   // #3 - output CSS into style tag
+          { loader: 'css-loader' },     // #2 - CSS into JS and resolve dependencies
+          { loader: 'sass-loader' },    // #1 - SCSS into CSS
         ]
       }
     ]
@@ -119,5 +119,112 @@ module.exports = {
 to use Sass, this is what happens: I write my `styles.scss` file which uses the `sass-loader`
 to compile it to CSS, my `css-loader` to parse the CSS into JavaScript and resolve
 dependencies, and the `style-loader` outputs CSS into a `<style>` tag in the document.
-- Here is another way to look at it: `styleLoader(cssLoader(sassLoader("source")))`
+- Here is another way to look at it: 
 
+```js
+styleLoader(cssLoader(sassLoader("source")));
+```
+- Another important feature of Webpack is Code Splitting where you don't load the entire
+app when you load the page.
+- The tutorial does a good job of showing how to use `webpack-merge` to use three webpack
+config files: a common one that both environments share, a development one, and a production
+file. Here is what they look like:
+```js
+const path = require('path')
+
+module.exports = {
+  entry: {
+    app: './src/app.js',
+  },
+  output: {
+    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'dist')
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader'
+        }
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+          { loader: 'sass-loader' }
+        ]
+      },
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: [
+          { loader: 'file-loader' }
+        ]
+      }
+    ]
+  }
+}
+```
+```js
+const merge = require('webpack-merge');
+const common = require('./webpack.common.js');
+
+module.exports = merge(common, {
+  mode: 'development'
+})
+```
+```js
+const merge = require('webpack-merge');
+const common = require('./webpack.common.js');
+
+module.exports = merge(common, {
+  mode: 'production'
+})
+```
+- Notice how the `webpack.common.js` has nothing changed - it's my original, while the development
+and production ones set the mode. With this setup, I can update my `package.json` scripts:
+```json
+{
+  // CODE
+  "scripts": {
+    "develop": "webpack --watch --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js"
+  },
+  // CODE
+}
+```
+- Now I'm ready to do some code splitting.
+- The next step in tutorial uses the [ExtractTextWebpackPlugin](https://webpack.js.org/plugins/extract-text-webpack-plugin/)
+which is no longer recommended for use when splitting CSS. They recommend using
+[MiniCssExtractPlugin](https://webpack.js.org/plugins/mini-css-extract-plugin/) which sounds like
+a big improvement over the ExtractTextWebpackPlugin and can do the following:
+- Async loading
+- No duplicate compilation (performance)
+- Easier to use
+- Specific to CSS
+- **CM:** I should remember this one, sounds like it's worth knowing.
+- I added the HtmlWebpackPlugin
+
+**Development** 
+
+- Now I'm adding the webpack-dev-server - so I guess now I don't need LiveServer or `npx serve`. I want
+to learn some of the other functionality that comes with webpack-dev-server
+```sh
+npm install --save-dev webpack-dev-server
+```
+```json
+// package.json
+{
+  "sripts": {
+    "develop": "webpack-dev-server --config webpack.dev.js",
+  }
+}
+```
+- now I can see my project on `localhost:8080`
+
+**Hot Module Replacement (HMR)**
+
+- I won't go too far into this because HMR has changed since this was written.
+- Overall, great tutorial.
