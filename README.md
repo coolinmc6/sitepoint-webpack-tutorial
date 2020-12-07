@@ -228,3 +228,14 @@ npm install --save-dev webpack-dev-server
 
 - I won't go too far into this because HMR has changed since this was written.
 - Overall, great tutorial.
+
+
+**Exercise:**
+
+- Build a webpack project that can / has:
+  - multiple config files
+  - uses webpack dev server
+  - can load SCSS, CSS, images, etc.
+  - Uses Babel
+  - Can load imports dynamically
+  - uses at least one plugin (HtmlWebpackPlugin or the CleanWebpackPlugin)
